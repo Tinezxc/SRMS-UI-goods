@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EarlyWatch — Compliance Demo</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0c0e12;
+    --card: #181c24;
+    --border: #232834;
+    --text: #f5f5f5;
+    --muted: #8b93a0;
+    --primary: #4f46e5;
+    --critical: #e63946;
+    --high: #f4a261;
+    --medium: #e9c46a;
+    --low: #2a9d8f;
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 2rem;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .container { max-width: 900px; margin: 0 auto; }
+
+  h1 { font-size: 1.6rem; font-weight: 700; margin-bottom: 0.35rem; }
+  h2 { font-size: 1rem; font-weight: 700; margin: 2rem 0 0.85rem; }
+  .subtitle { color: var(--muted); font-size: 0.85rem; margin-bottom: 2rem; }
+
+  /* Role switcher */
+  .roles {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    padding: 0.35rem;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    width: fit-content;
+  }
+  .role-btn {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+  }
+  .role-btn:hover { color: var(--text); }
+  .role-btn.active { background: var(--primary); color: #fff; }
+
+  /* Summary */
+  .summary {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+  }
+  .summary-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    text-align: center;
+  }
+  .summary-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    margin-bottom: 2px;
+  }
+  .summary-label {
+    font-size: 0.7rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+  }
+
+  /* Task list */
+  .tasks {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .task {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--medium);
+    border-radius: 8px;
+    padding: 1rem 1.15rem;
+  }
+  .task.priority-critical { border-left-color: var(--critical); }
+  .task.priority-high     { border-left-color: var(--high); }
+  .task.priority-medium   { border-left-color: var(--medium); }
+  .task.priority-low      { border-left-color: var(--low); }
+
+  .task-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+  }
+  .task-title { font-size: 0.95rem; font-weight: 700; color: #fff; margin-bottom: 3px; }
+  .task-meta { font-size: 0.72rem; color: var(--muted); }
+  .task-meta strong { color: #c5cbd4; font-weight: 600; }
+
+  .badge {
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 999px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+  }
+  .badge.pending     { background: rgba(244,162,97,.14); color: #f4a261; }
+  .badge.in_progress { background: rgba(59,130,246,.14); color: #7cb3ff; }
+  .badge.complied    { background: rgba(42,157,143,.14); color: #4fd1bd; }
+  .badge.cleared     { background: rgba(34,197,94,.14);  color: #86efac; }
+
+  .task-desc {
+    font-size: 0.83rem;
+    color: #d7dce4;
+    line-height: 1.5;
+    margin: 0.4rem 0 0.65rem;
+  }
+
+  .task-note {
+    font-size: 0.75rem;
+    color: var(--muted);
+    padding: 0.5rem 0.65rem;
+    background: rgba(255,255,255,0.02);
+    border-left: 2px solid var(--border);
+    border-radius: 4px;
+    margin-bottom: 0.6rem;
+    line-height: 1.5;
+  }
+  .task-note strong { color: #c5cbd4; }
+
+  .task-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 0.35rem;
+  }
+
+  button.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0.4rem 0.9rem;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: #c5cbd4;
+    font-family: inherit;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.12s, border-color 0.12s, color 0.12s, transform 0.12s;
+  }
+  button.btn:hover { background: rgba(255,255,255,0.05); color: #fff; }
+  button.btn:active { transform: translateY(1px); }
+  button.btn.primary { background: var(--primary); border-color: var(--primary); color: #fff; }
+  button.btn.primary:hover { background: #5a52ed; }
+  button.btn.success { background: rgba(42,157,143,.14); border-color: rgba(42,157,143,.4); color: #4fd1bd; }
+  button.btn.danger  { background: rgba(230,57,70,.14);  border-color: rgba(230,57,70,.4);  color: #ff7e87; }
+
+  /* Assign task form (instructor view) */
+  .assign-form {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.15rem;
+    margin-bottom: 1.25rem;
+  }
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+  .form-grid .full { grid-column: 1 / -1; }
+  label { display: block; }
+  label > span {
+    display: block;
+    font-size: 0.72rem;
+    color: #b7bec8;
+    font-weight: 600;
+    margin-bottom: 0.3rem;
+  }
+  input, select, textarea {
+    width: 100%;
+    padding: 0.55rem 0.75rem;
+    background: #0d1118;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: #fff;
+    font-family: inherit;
+    font-size: 0.85rem;
+    outline: none;
+  }
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(79,70,229,0.12);
+  }
+  textarea { resize: vertical; }
+
+  /* Empty state */
+  .empty {
+    padding: 2rem;
+    text-align: center;
+    background: var(--card);
+    border: 1px dashed var(--border);
+    border-radius: 8px;
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 0.75rem 1.25rem;
+    border-radius: 8px;
+    background: rgba(42,157,143,0.96);
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 600;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    opacity: 0;
+    transition: opacity 0.2s;
+    z-index: 9999;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; }
+  .toast.error { background: rgba(230,57,70,0.96); }
+
+  /* Reset bar */
+  .toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+  .toolbar-info { font-size: 0.78rem; color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Compliance Demo — Alex Reyes</h1>
+  <p class="subtitle">Student ID: 01-COLL-24-2742 · Interactive walkthrough</p>
+
+  <!-- Role switcher -->
+  <div class="roles">
+    <button class="role-btn active" data-role="student">👨‍🎓 Student view</button>
+    <button class="role-btn" data-role="instructor">👨‍🏫 Instructor view</button>
+  </div>
+
+  <!-- Summary -->
+  <div class="summary" id="summary"></div>
+
+  <!-- Instructor — assign form -->
+  <div class="assign-form" id="assignForm" style="display:none;">
+    <h2 style="margin-top:0;">Assign a new task</h2>
+    <form id="taskForm">
+      <div class="form-grid">
+        <label class="full">
+          <span>Task title</span>
+          <input type="text" name="title" required
+                 placeholder="e.g. Attend 2 consecutive remedial Math sessions">
+        </label>
+        <label>
+          <span>Category</span>
+          <select name="category">
+            <option>Academic</option>
+            <option>Behavior</option>
+            <option>Attendance</option>
+            <option>Administrative</option>
+          </select>
+        </label>
+        <label>
+          <span>Priority</span>
+          <select name="priority">
+            <option>critical</option>
+            <option selected>high</option>
+            <option>medium</option>
+            <option>low</option>
+          </select>
+        </label>
+        <label>
+          <span>Due date</span>
+          <input type="date" name="dueDate">
+        </label>
+        <label>
+          <span>Assigned by</span>
+          <input type="text" name="assignedBy" value="Prof. Jovic Lanao">
+        </label>
+        <label class="full">
+          <span>Description</span>
+          <textarea name="description" rows="2"
+                    placeholder="Every Friday 2:00–4:00 PM, Room 210 with Prof. Santos."></textarea>
+        </label>
+      </div>
+      <button type="submit" class="btn primary">＋ Assign task</button>
+    </form>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <div class="toolbar-info" id="toolbarInfo"></div>
+    <button class="btn" onclick="resetDemo()" title="Reset all tasks">↻ Reset demo</button>
+  </div>
+
+  <!-- Task list -->
+  <h2 id="taskListTitle">Tasks</h2>
+  <div class="tasks" id="taskList"></div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   Storage — persists in localStorage under its own key
+   ============================================================ */
+const STORAGE_KEY = "earlywatch.complianceDemo";
+const STUDENT_ID  = "01-COLL-24-2742";
+const STUDENT_NAME = "Alex Reyes";
+
+/* Seed tasks (loaded only on first run) */
+const SEED_TASKS = [
+  {
+    id: "ct_seed001",
+    title: "Attend 2 consecutive remedial Math sessions",
+    description: "Every Friday 2:00–4:00 PM, Room 210 with Prof. Santos. Bring your notebook and calculator.",
+    linkedAlert: null,
+    category: "Academic",
+    priority: "high",
+    status: "pending",
+    assignedBy: "Prof. Jovic Lanao",
+    dueDate: "2026-10-15",
+    createdAt: "2026-09-28",
+    studentNote: "",
+    adminNote: "",
+    completedAt: null
+  },
+  {
+    id: "ct_seed002",
+    title: "Parent-signed attendance warning",
+    description: "Submit the signed attendance warning form to the registrar.",
+    linkedAlert: "a_001",
+    category: "Attendance",
+    priority: "critical",
+    status: "in_progress",
+    assignedBy: "Prof. Jovic Lanao",
+    dueDate: "2026-10-01",
+    createdAt: "2026-09-24",
+    studentNote: "Parent signed on Sept 27. Will submit on Monday.",
+    adminNote: "",
+    completedAt: null
+  }
+];
+
+/* ---------- Tiny data layer ---------- */
+const DB = {
+  tasks: [],
+
+  load() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        this.tasks = JSON.parse(raw);
+      } else {
+        this.tasks = JSON.parse(JSON.stringify(SEED_TASKS));
+        this.save();
+      }
+    } catch (e) {
+      this.tasks = JSON.parse(JSON.stringify(SEED_TASKS));
+    }
+  },
+
+  save() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(this.tasks)); }
+    catch (e) { console.warn("Save failed:", e); }
+  },
+
+  add(data) {
+    const task = {
+      id:          "ct_" + Math.random().toString(36).slice(2, 9),
+      title:       (data.title || "Untitled").trim(),
+      description: data.description || "",
+      linkedAlert: null,
+      category:    data.category || "Academic",
+      priority:    data.priority || "medium",
+      status:      "pending",
+      assignedBy:  data.assignedBy || "",
+      dueDate:     data.dueDate || null,
+      createdAt:   new Date().toISOString().slice(0, 10),
+      studentNote: "",
+      adminNote:   "",
+      completedAt: null
+    };
+    this.tasks.unshift(task);
+    this.save();
+    return task;
+  },
+
+  updateStatus(taskId, newStatus, studentNote) {
+    const t = this.tasks.find(x => x.id === taskId);
+    if (!t) return null;
+    t.status = newStatus;
+    if (typeof studentNote === "string") t.studentNote = studentNote;
+    if (newStatus === "complied" || newStatus === "cleared") {
+      t.completedAt = new Date().toISOString().slice(0, 10);
+    } else {
+      t.completedAt = null;
+    }
+    this.save();
+    return t;
+  },
+
+  approve(taskId, adminNote) {
+    const t = this.tasks.find(x => x.id === taskId);
+    if (!t) return null;
+    t.status      = "cleared";
+    t.adminNote   = adminNote || "";
+    t.completedAt = new Date().toISOString().slice(0, 10);
+    this.save();
+    return t;
+  },
+
+  reject(taskId, adminNote) {
+    const t = this.tasks.find(x => x.id === taskId);
+    if (!t) return null;
+    t.status      = "in_progress";
+    t.adminNote   = adminNote || "";
+    t.completedAt = null;
+    this.save();
+    return t;
+  },
+
+  remove(taskId) {
+    this.tasks = this.tasks.filter(x => x.id !== taskId);
+    this.save();
+  },
+
+  reset() {
+    this.tasks = JSON.parse(JSON.stringify(SEED_TASKS));
+    this.save();
+  }
+};
+
+/* ============================================================
+   UI State
+   ============================================================ */
+let currentRole = "student";
+
+/* ---------- Helpers ---------- */
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, c =>
+    ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c])
+  );
+}
+
+function toast(msg, isError) {
+  const el = document.getElementById("toast");
+  el.textContent = msg;
+  el.className = "toast show" + (isError ? " error" : "");
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.className = "toast", 2200);
+}
+
+/* ============================================================
+   RENDERING
+   ============================================================ */
+function render() {
+  renderSummary();
+  renderList();
+  renderToolbar();
+}
+
+function renderSummary() {
+  const pending    = DB.tasks.filter(t => t.status === "pending").length;
+  const inProgress = DB.tasks.filter(t => t.status === "in_progress").length;
+  const complied   = DB.tasks.filter(t => t.status === "complied").length;
+  const cleared    = DB.tasks.filter(t => t.status === "cleared").length;
+
+  document.getElementById("summary").innerHTML = `
+    <div class="summary-card">
+      <div class="summary-value" style="color:#f4a261;">${pending}</div>
+      <div class="summary-label">Pending</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-value" style="color:#7cb3ff;">${inProgress}</div>
+      <div class="summary-label">In Progress</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-value" style="color:#4fd1bd;">${complied}</div>
+      <div class="summary-label">Awaiting Approval</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-value" style="color:#86efac;">${cleared}</div>
+      <div class="summary-label">Cleared</div>
+    </div>
+  `;
+}
+
+function renderToolbar() {
+  const info = document.getElementById("toolbarInfo");
+  info.textContent = `${DB.tasks.length} task${DB.tasks.length === 1 ? "" : "s"} · ${STUDENT_NAME}`;
+}
+
+function renderList() {
+  const list = document.getElementById("taskList");
+  const title = document.getElementById("taskListTitle");
+  const assignForm = document.getElementById("assignForm");
+
+  /* Show assign form only for instructor */
+  assignForm.style.display = currentRole === "instructor" ? "" : "none";
+  title.textContent = currentRole === "instructor"
+    ? "All tasks (instructor view)"
+    : "My tasks";
+
+  if (!DB.tasks.length) {
+    list.innerHTML = `<div class="empty">No tasks yet. Use the form above to assign one.</div>`;
+    return;
+  }
+
+  /* Sort: open first, then complied, then cleared */
+  const order = { pending: 0, in_progress: 1, complied: 2, cleared: 3 };
+  const sorted = DB.tasks.slice().sort((a, b) => {
+    const d = order[a.status] - order[b.status];
+    return d !== 0 ? d : (a.dueDate || "").localeCompare(b.dueDate || "");
+  });
+
+  list.innerHTML = sorted.map(t => {
+    const badgeText = {
+      pending:     "Pending",
+      in_progress: "In Progress",
+      complied:    "Complied",
+      cleared:     "Cleared"
+    }[t.status] || t.status;
+
+    /* Notes */
+    const studentNote = t.studentNote
+      ? `<div class="task-note"><strong>Student note:</strong> ${esc(t.studentNote)}</div>`
+      : "";
+    const adminNote = t.adminNote
+      ? `<div class="task-note"><strong>Instructor feedback:</strong> ${esc(t.adminNote)}</div>`
+      : "";
+
+    /* Actions — depend on role AND status */
+    let actions = "";
+
+    if (currentRole === "student") {
+      if (t.status === "pending") {
+        actions = `<button class="btn primary" onclick="studentStart('${t.id}')">Start task</button>`;
+      } else if (t.status === "in_progress") {
+        actions = `<button class="btn success" onclick="studentComplete('${t.id}')">Mark as completed</button>`;
+      } else if (t.status === "complied") {
+        actions = `<span style="font-size:.76rem;color:var(--muted);">Waiting for instructor approval…</span>`;
+      } else {
+        actions = `<span style="font-size:.76rem;color:#86efac;font-weight:600;">✓ Cleared on ${t.completedAt}</span>`;
+      }
+    }
+
+    if (currentRole === "instructor") {
+      if (t.status === "complied") {
+        actions = `
+          <button class="btn success" onclick="instructorApprove('${t.id}')">✓ Approve</button>
+          <button class="btn danger"  onclick="instructorReject('${t.id}')">✕ Reject</button>
+        `;
+      } else if (t.status === "cleared") {
+        actions = `
+          <span style="font-size:.76rem;color:#86efac;font-weight:600;">✓ Cleared on ${t.completedAt}</span>
+          <button class="btn" onclick="removeTask('${t.id}')">Delete</button>
+        `;
+      } else {
+        actions = `
+          <span style="font-size:.76rem;color:var(--muted);">
+            ${t.status === "pending" ? "Student hasn't started yet." : "Student is working on it."}
+          </span>
+          <button class="btn" onclick="removeTask('${t.id}')">Delete</button>
+        `;
+      }
+    }
+
+    return `
+      <article class="task priority-${t.priority}">
+        <div class="task-head">
+          <div>
+            <div class="task-title">${esc(t.title)}</div>
+            <div class="task-meta">
+              ${esc(t.category)} ·
+              Assigned by <strong>${esc(t.assignedBy || "—")}</strong>
+              ${t.dueDate ? ` · Due <strong>${t.dueDate}</strong>` : ""}
+            </div>
+          </div>
+          <span class="badge ${t.status}">${badgeText}</span>
+        </div>
+        ${t.description ? `<p class="task-desc">${esc(t.description)}</p>` : ""}
+        ${studentNote}
+        ${adminNote}
+        <div class="task-actions">${actions}</div>
+      </article>`;
+  }).join("");
+}
+
+/* ============================================================
+   STUDENT ACTIONS
+   ============================================================ */
+function studentStart(taskId) {
+  const t = DB.updateStatus(taskId, "in_progress");
+  if (!t) return;
+  toast("Task started ✓");
+  render();
+}
+
+function studentComplete(taskId) {
+  const note = prompt(
+    "Optional: add a note about how you completed this task.\n\n" +
+    "Example: 'Attended both Fridays (Oct 3 and Oct 10). Logbook signed by Prof. Santos.'",
+    ""
+  );
+  if (note === null) return;   // user cancelled
+
+  DB.updateStatus(taskId, "complied", note.trim());
+  toast("Marked as completed — awaiting instructor approval ✓");
+  render();
+}
+
+/* ============================================================
+   INSTRUCTOR ACTIONS
+   ============================================================ */
+function instructorApprove(taskId) {
+  const note = prompt(
+    "Approval comment (optional, seen by the student):",
+    "Verified. Case closed."
+  );
+  if (note === null) return;
+
+  DB.approve(taskId, note.trim());
+  toast("Task approved and cleared ✓");
+  render();
+}
+
+function instructorReject(taskId) {
+  const note = prompt(
+    "Why is this being sent back? (required, shown to the student):",
+    ""
+  );
+  if (note === null) return;
+  if (!note.trim()) {
+    toast("A rejection reason is required.", true);
+    return;
+  }
+
+  DB.reject(taskId, note.trim());
+  toast("Task sent back to the student", true);
+  render();
+}
+
+function removeTask(taskId) {
+  if (!confirm("Delete this task permanently?")) return;
+  DB.remove(taskId);
+  toast("Task deleted");
+  render();
+}
+
+/* ============================================================
+   ASSIGN TASK (instructor form)
+   ============================================================ */
+document.getElementById("taskForm").addEventListener("submit", function (e) {
+  e.preventDefault();
+  const data = Object.fromEntries(new FormData(this).entries());
+  if (!data.title || !data.title.trim()) {
+    toast("Task title is required.", true);
+    return;
+  }
+  DB.add(data);
+  this.reset();
+  document.querySelector('#taskForm [name="assignedBy"]').value = "Prof. Jovic Lanao";
+  document.querySelector('#taskForm [name="priority"]').value   = "high";
+  toast("Task assigned ✓");
+  render();
+});
+
+/* ============================================================
+   ROLE SWITCHER
+   ============================================================ */
+document.querySelectorAll(".role-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".role-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    currentRole = btn.dataset.role;
+    render();
+  });
+});
+
+/* ============================================================
+   RESET DEMO
+   ============================================================ */
+function resetDemo() {
+  if (!confirm("Reset all tasks back to their original state?")) return;
+  DB.reset();
+  toast("Demo reset");
+  render();
+}
+
+/* ============================================================
+   BOOT
+   ============================================================ */
+DB.load();
+render();
+</script>
+</body>
+</html>

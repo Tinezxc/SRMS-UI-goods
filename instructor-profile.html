@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>EarlyWatch - My Profile</title>
+  <link rel="stylesheet" href="assets/instructor.css">
+  <link rel="stylesheet" href="assets/modal.css">
+  <link rel="stylesheet" href="assets/profile.css">
+  <link rel="stylesheet" href="assets/polish.css">
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo-icon"><i data-lucide="layers"></i></div>
+      <div>
+        <div class="brand-name">EarlyWatch</div>
+        <div class="brand-sub">Instructor</div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="instructor-dashboard.html" class="nav-item">
+        <i data-lucide="layout-grid"></i><span>Dashboard</span>
+      </a>
+      <a href="instructor-student-records.html" class="nav-item">
+        <i data-lucide="users"></i><span>Student Records</span>
+      </a>
+      <a href="instructor-interventions.html" class="nav-item">
+        <i data-lucide="clipboard-list"></i><span>Interventions</span>
+      </a>
+      <a href="instructor-makeup.html" class="nav-item">
+        <i data-lucide="file-check-2"></i><span>Makeup Requests</span>
+        <span class="badge red" id="navMakeupCount"></span>
+      </a>
+      <a href="instructor-alerts.html" class="nav-item">
+        <i data-lucide="bell"></i><span>Alerts</span>
+        <span class="badge red" id="navAlertCount">0</span>
+      </a>
+      <a href="instructor-makeup.html" class="nav-item">
+  <i data-lucide="file-check-2"></i><span>Makeup Requests</span>
+  <span class="badge red" id="navMakeupCount"></span>
+</a>
+      <a href="instructor-profile.html" class="nav-item active">
+        <i data-lucide="user-circle"></i><span>Profile</span>
+      </a>
+      
+    </nav>
+
+    <div class="user-profile">
+      <div class="avatar" data-user-initials>PJ</div>
+      <div class="user-info">
+        <div class="user-name" data-user-name>Prof. Jovic Lanao</div>
+        <div class="user-role" data-user-role>Instructor</div>
+      </div>
+      <button type="button" class="logout-btn" onclick="ewLogout()" title="Logout">
+        <i data-lucide="log-out"></i>
+      </button>
+    </div>
+  </aside>
+
+  <main class="main-content" id="profileRoot">
+    <div class="text-muted" style="padding:2rem;">Loading profile…</div>
+  </main>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="js/db.js"></script>
+  <script src="js/risk.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/profile-self.js"></script>
+  <script>
+    ewGuard("instructor");
+    ewInitSelfProfilePage();
+  </script>
+</body>
+</html>

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>EarlyWatch - My Academic Status</title>
+  <link rel="stylesheet" href="assets/student.css">
+  <link rel="stylesheet" href="assets/modal.css">
+  <link rel="stylesheet" href="assets/skeleton.css">
+  <link rel="stylesheet" href="assets/polish.css">
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo-icon"><i data-lucide="layers"></i></div>
+      <div>
+        <div class="brand-name">EarlyWatch</div>
+        <div class="brand-sub">Student</div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="student-dashboard.html" class="nav-item active">
+        <i data-lucide="bar-chart-3"></i><span>Performance</span>
+      </a>
+            <a href="student-profile.html" class="nav-item">
+        <i data-lucide="user-circle"></i><span>Profile</span>
+      </a>
+    </nav>
+
+    <div class="user-profile">
+      <div class="avatar" data-user-initials>AR</div>
+      <div class="user-info">
+        <div class="user-name" data-user-name>Alex Reyes</div>
+        <div class="user-role" data-user-role>Student</div>
+      </div>
+      <button type="button" class="logout-btn" onclick="ewLogout()" title="Logout">
+        <i data-lucide="log-out"></i>
+      </button>
+    </div>
+  </aside>
+
+  <main class="main-content" id="studentRoot">
+    <header class="header">
+      <h1>My Academic Status</h1>
+      <p class="subtitle" data-user-meta>Loading…</p>
+    </header>
+
+    <div class="risk-banner" id="riskBanner">
+      <i data-lucide="triangle-alert" class="risk-icon"></i>
+      <div class="risk-content">
+        <div class="risk-title">Loading risk status…</div>
+        <div class="risk-sub"></div>
+      </div>
+    </div>
+
+    <!-- ============================================================
+         TAB BAR
+         ============================================================ -->
+    <nav class="student-tabs" id="studentTabs" role="tablist">
+      <button type="button" class="student-tab active" data-tab="overview" role="tab" aria-selected="true">
+        <i data-lucide="layout-dashboard"></i>
+        <span>Overview</span>
+      </button>
+      <button type="button" class="student-tab" data-tab="subjects" role="tab" aria-selected="false">
+        <i data-lucide="book-open"></i>
+        <span>Subjects</span>
+      </button>
+      <button type="button" class="student-tab" data-tab="attendance" role="tab" aria-selected="false">
+        <i data-lucide="calendar-check"></i>
+        <span>Attendance</span>
+        <span class="tab-count" data-tab-count="attendance"></span>
+      </button>
+      <button type="button" class="student-tab" data-tab="missed" role="tab" aria-selected="false">
+        <i data-lucide="clipboard-x"></i>
+        <span>Missed Activities</span>
+        <span class="tab-count tab-count-danger" data-tab-count="missed"></span>
+      </button>
+      <button type="button" class="student-tab" data-tab="quizzes" role="tab" aria-selected="false">
+        <i data-lucide="help-circle"></i>
+        <span>Quizzes</span>
+        <span class="tab-count" data-tab-count="quizzes"></span>
+      </button>
+      <button type="button" class="student-tab" data-tab="history" role="tab" aria-selected="false">
+        <i data-lucide="trending-up"></i>
+        <span>Risk History</span>
+      </button>
+    </nav>
+
+    <!-- ============================================================
+         TAB PANELS
+         ============================================================ -->
+    <div class="tab-panels">
+
+      <!-- ---------- OVERVIEW ---------- -->
+      <section class="tab-panel active" data-panel="overview" role="tabpanel">
+        <section class="metrics-grid">
+          <div class="metric-card">
+            <div class="metric-value" data-stu="gpa">—</div>
+            <div class="metric-label">GPA</div>
+            <div class="metric-sub">Current term</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value" data-stu="attendance">—</div>
+            <div class="metric-label">Attendance</div>
+            <div class="metric-sub">Across all subjects</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value text-success" data-stu="passing">—</div>
+            <div class="metric-label">Subjects Passing</div>
+            <div class="metric-sub" data-stu="passing-sub">—</div>
+          </div>
+        </section>
+
+        <div class="section-title">Subject Performance Summary</div>
+        <div class="subjects-list" id="studentSubjectsOverview"></div>
+      </section>
+
+      <!-- ---------- SUBJECTS ---------- -->
+      <section class="tab-panel" data-panel="subjects" role="tabpanel">
+        <div class="section-title">Subject Breakdown</div>
+        <div class="subjects-list" id="studentSubjects"></div>
+      </section>
+
+      <!-- ---------- ATTENDANCE ---------- -->
+      <section class="tab-panel" data-panel="attendance" role="tabpanel">
+        <div class="section-title">Per-Subject Attendance</div>
+        <div class="attendance-list" id="studentAttendance"></div>
+      </section>
+
+      <!-- ---------- MISSED ACTIVITIES ---------- -->
+<section class="tab-panel" data-panel="missed" role="tabpanel">
+  <div class="section-title">Missed Activities</div>
+  <div class="missed-summary" id="studentMissedSummary"></div>
+  <div class="missed-list" id="studentMissedList"></div>
+
+  <div class="section-title" style="margin-top:1.5rem;">My Makeup Requests</div>
+  <div class="makeup-list" id="studentMakeupList"></div>
+</section>
+
+      <!-- ---------- QUIZZES ---------- -->
+      <section class="tab-panel" data-panel="quizzes" role="tabpanel">
+        <div class="section-title">Quiz Scores</div>
+        <div class="quiz-list" id="studentQuizzes"></div>
+      </section>
+
+      <!-- ---------- RISK HISTORY ---------- -->
+      <section class="tab-panel" data-panel="history" role="tabpanel">
+        <div class="section-title">Risk Score History</div>
+        <div class="history-chart" id="studentHistory"></div>
+      </section>
+
+    </div>
+  </main>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="js/db.js"></script>
+  <script src="js/risk.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    ewGuard("student");
+    ewInitStudentDashboard();
+    (function () {
+      const u = ewCurrentUser();
+      const s = u && u.studentId ? EW_DB.students.get(u.studentId) : null;
+      const meta = document.querySelector("[data-user-meta]");
+      if (meta && s) {
+        meta.textContent = `${s.course} · ${s.section} · Academic Year 2026–2027, 1st Semester`;
+      }
+    })();
+  </script>
+</body>
+</html>
